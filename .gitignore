@@ -2,7 +2,7 @@
 __pycache__/
 *.pyc
 .venv/
-*.env
+.env
 
 # Node
 node_modules/
@@ -17,3 +17,4 @@ target/
 # OS
 .DS_Store
 Thumbs.db
+EOF
