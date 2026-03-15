@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;400&display=swap');
+
+.splash-container {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+}
+
+.splash-container.fade-out {
+    animation: fadeOut 0.5s ease-in forwards;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* 회전 원형 래퍼 */
+.splash-ring-wrapper {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 그라디언트 회전 링 */
+.splash-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    padding: 2px;
+    background: conic-gradient(from 0deg,
+            #7B2FBE,
+            #2196F3,
+            #00BCD4,
+            #7B2FBE);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: spin 2.5s linear infinite;
+}
+
+/* 에러 상태 링 */
+.splash-ring.error {
+    background: conic-gradient(from 0deg,
+            #ff4444,
+            #ff8800,
+            #ff4444);
+    animation: pulse-ring 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse-ring {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+/* 원형 내부 */
+.splash-inner {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 1;
+}
+
+/* 로고 이미지 */
+.splash-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Loading 텍스트 */
+.splash-loading-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: #aaaaaa;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.splash-dots span {
+    animation: blink 1.2s infinite;
+    color: #00BCD4;
+}
+
+.splash-dots span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.splash-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.splash-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* 에러 텍스트 */
+.splash-error-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #ff4444;
+    text-align: center;
+    line-height: 1.6;
+    padding: 0 10px;
+}
+
+/* 재시도 버튼 */
+.splash-retry-btn {
+    margin-top: 6px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid #ff4444;
+    background: transparent;
+    color: #ff4444;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.splash-retry-btn:hover {
+    background: #ff444422;
+}
