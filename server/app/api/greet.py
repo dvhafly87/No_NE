@@ -34,7 +34,7 @@ async def greet(session_id: str = "user"):
             SystemMessage(content=f"""
                 사용자가 앱에 접속했습니다.
                 {time_context}에 맞는 자연스러운 인사를 건네세요.
-                짧고 친근하게.
+                다양하고 친근하게.
                 {f'[사용자 정보]{chr(10)}{setting_text}' if setting_text else ''}
             """),
             HumanMessage(content="접속")

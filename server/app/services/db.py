@@ -3,6 +3,8 @@ import json
 import os
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "../../../no_ne.db")
+FINETUNE_DIR = os.path.join(os.path.dirname(__file__), "../../../docs/finetune/auto")
+
 
 #.db 파일 자동 생성
 def init_db():
@@ -38,6 +40,24 @@ def get_settings(session_id: str) -> list:
     conn.close()
     return json.loads(row[0]) if row else []
 
+def export_finetune_chunk(history: list):
+    os.makedirs(FINETUNE_DIR, exist_ok=True)
+
+    # 쌍으로 묶기
+    pairs = []
+    for i in range(0, len(history) - 1, 2):
+        if history[i]["role"] == "user" and history[i+1]["role"] == "me":
+            pairs.append({
+                "instruction": history[i]["content"],
+                "output": history[i+1]["content"]
+            })
+
+    chunks = [pairs[i:i+50] for i in range(0, len(pairs), 50)]
+    for idx, chunk in enumerate(chunks):
+        filename = os.path.join(FINETUNE_DIR, f"turn_{idx*50+1}_{(idx+1)*50}.json")
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(chunk, f, ensure_ascii=False, indent=2)
+
 #새 대화 내역 저장
 def save_history(session_id: str, history: list, settings: list):
     conn = sqlite3.connect(DB_PATH)
@@ -52,3 +72,7 @@ def save_history(session_id: str, history: list, settings: list):
           json.dumps(settings, ensure_ascii=False)))
     conn.commit()
     conn.close()
+
+    turn_count = len(history) // 2
+    if turn_count % 50 == 0 and turn_count > 0:
+        export_finetune_chunk(history)

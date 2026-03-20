@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import Splash from "./components/interface/Splash.jsx"
-import Chat from "./components/communication/Chat.jsx"
+import Chatter from "./components/communication/ChatterInterface.jsx"
 
 import './App.css';
 
@@ -25,7 +25,7 @@ function App() {
   return (
     <>
       {screen === "splash" && <Splash onDone={() => setScreen("chat")} />}
-      {screen === "chat" && <Chat theme={theme} setTheme={setTheme} />}
+      {screen === "chat" && <Chatter theme={theme} setTheme={setTheme} />}
     </>
   )
 }

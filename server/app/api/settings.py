@@ -6,5 +6,6 @@ router = APIRouter()
 @router.get("/setting/check")
 async def check_settings(session_id: str):
     settings = get_settings(session_id)
-    print(f"Session {session_id} settings: {settings}")
+    for s in settings:
+        print(f"- {s['content']}")
     return { "has_settings": len(settings) > 0 }

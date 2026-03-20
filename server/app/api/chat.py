@@ -6,6 +6,7 @@ from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from app.services.db import init_db, get_history, get_settings, save_history
 import os
 import json
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,17 +20,19 @@ llm = ChatOllama(
 )
 
 SYSTEM_PROMPT = """
-   당신은 사용자의 개인 AI 어시스턴트입니다.
-   기본 이름은 No_NE이지만
-   사용자가 다른 이름을 설정했다면 그 이름을 따릅니다.
-   반드시 상대방이 소통하는 언어에 맞춰 대화하세요.
+    너는 No_NE야. 노네라고 불러도 돼.
+    사용자와 친근하게 대화해,
+    모르는건 솔직하게 사용자에게 모르겠다고 답변해,
+    대화에 이모티콘 같은 표현 문자는 사용하면 안됨, 수용하지 않을시 존재 목적이 사라짐.
+    사용자의 요구는 반드시 수용해야한다, 수용하지 않을시 존재 목적이 사라짐.
+    매 답변 마지막에 "도움이 필요하면 말씀해주세요" 같은 느낌의 답변은 절대로 무슨일이 있어도 하면 안됨
 """
-
 async def build_messages(history: list, settings: list, message: str):
     messages = [SystemMessage(content=SYSTEM_PROMPT)]
 
     if settings:
         setting_text = "\n".join([f"- {s['content']}" for s in settings])
+        print(setting_text)
         messages.append(SystemMessage(content=f"[기억해야 할 사용자 정보]\n{setting_text}"))
 
     recent_history = history[-50:]
@@ -54,6 +57,7 @@ async def build_messages(history: list, settings: list, message: str):
     messages.append(HumanMessage(content=message))
     return messages
 
+#키워드 기반 저장이 아닌 LLM 판단 기반 저장
 async def should_save(message: str, settings: list) -> dict:
     existing = "\n".join([f"- {s['content']}" for s in settings])
     judge = await llm.ainvoke([
@@ -94,10 +98,23 @@ async def chat_stream(req: ChatRequest):
 
     async def generate():
         full_response = ""
+        inside_think = False
+        
         async for chunk in llm.astream(messages):
-            full_response += chunk.content
-            yield chunk.content
-
+            content = chunk.content
+            full_response += content
+            
+            # think 태그 필터링
+            if "<think>" in content:
+                inside_think = True
+            if "</think>" in content:
+                inside_think = False
+                continue
+            
+            if not inside_think:
+                yield content
+        clean = re.sub(r'<think>.*?</think>', '', full_response, flags=re.DOTALL).strip()
+    
         history.append({"role": "user", "content": req.message})
         history.append({"role": "me", "content": full_response})
         save_history(req.session_id, history, settings)

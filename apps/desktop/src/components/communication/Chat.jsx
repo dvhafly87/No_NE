@@ -3,13 +3,16 @@ import API from '../../config/ApiConfig.js'
 
 import '../../css/Chat.css';
 
+
 const API_URL = API.API_BASE_URL
 const SESSION_ID = API.SESSION_ID
 
-export default function ChattingInterface({ theme, setTheme }) {
+export default function ChattingInterface({ theme, setTheme, onSettingsOpen }) {
     const [messages, setMessages] = useState([])
     const [input, setInput] = useState("")
     const [isStreaming, setIsStreaming] = useState(false)
+    const [showTuneAlert, setShowTuneAlert] = useState(false)
+
     const bottomRef = useRef(null)
 
     useEffect(() => {
@@ -39,12 +42,6 @@ export default function ChattingInterface({ theme, setTheme }) {
         }
         greet()
     }, [])
-
-    const toggleTheme = () => {
-        const newTheme = theme === "dark" ? "light" : "dark"
-        setTheme(newTheme)
-        localStorage.setItem("theme", newTheme)
-    }
 
     const sendMessage = async () => {
         if (!input.trim() || isStreaming) return
@@ -84,6 +81,20 @@ export default function ChattingInterface({ theme, setTheme }) {
             console.error(e)
         } finally {
             setIsStreaming(false)
+
+            const turnCount = messages.filter(m => m.role === "human").length + 1
+            if (turnCount % 50 === 0) {
+
+                // 백엔드에 알림
+                await fetch(`${API_URL}/finetune/ready`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ session_id: SESSION_ID, turn_count: turnCount })
+                })
+
+                // 프론트에 알림 표시
+                setShowTuneAlert(true)
+            }
         }
     }
 
@@ -96,7 +107,25 @@ export default function ChattingInterface({ theme, setTheme }) {
 
     return (
         <div className="chat-container" style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "sans-serif" }}>
-
+            {/* 상단 헤더 추가 */}
+            <div style={{
+                padding: "15px 20px",
+                borderBottom: "1px solid #ccc",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+            }}>
+                <h3 style={{ margin: 0 }}>No_NE</h3>
+                <span style={{ fontSize: "0.85rem", background: "#eee", padding: "4px 8px", borderRadius: "12px", color: "#333" }}>
+                    대화 기록: {messages.filter(m => m.role === "human").length} Turns
+                </span>
+                <button onClick={onSettingsOpen} style={{ padding: "6px 12px", borderRadius: "8px", border: "none", cursor: "pointer" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                </button>
+            </div>
             {/* 메시지 목록 */}
             <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
                 {messages.map((msg, i) => (
@@ -141,9 +170,6 @@ export default function ChattingInterface({ theme, setTheme }) {
                     style={{ padding: "0 16px", borderRadius: "8px" }}
                 >
                     {isStreaming ? "..." : "전송"}
-                </button>
-                <button onClick={toggleTheme}>
-                    {theme === "dark" ? "☀️" : "🌙"}
                 </button>
             </div>
         </div>
