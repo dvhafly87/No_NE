@@ -21,7 +21,7 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
-
+ 
   return (
     <>
       {screen === "splash" && <Splash onDone={() => setScreen("chat")} />}

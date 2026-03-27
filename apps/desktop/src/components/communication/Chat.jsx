@@ -82,19 +82,19 @@ export default function ChattingInterface({ theme, setTheme, onSettingsOpen }) {
         } finally {
             setIsStreaming(false)
 
-            const turnCount = messages.filter(m => m.role === "human").length + 1
-            if (turnCount % 50 === 0) {
+            // const turnCount = messages.filter(m => m.role === "human").length + 1
+            // if (turnCount % 50 === 0) {
 
-                // 백엔드에 알림
-                await fetch(`${API_URL}/finetune/ready`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ session_id: SESSION_ID, turn_count: turnCount })
-                })
+            //     // 백엔드에 알림
+            //     await fetch(`${API_URL}/finetune/ready`, {
+            //         method: "POST",
+            //         headers: { "Content-Type": "application/json" },
+            //         body: JSON.stringify({ session_id: SESSION_ID, turn_count: turnCount })
+            //     })
 
-                // 프론트에 알림 표시
-                setShowTuneAlert(true)
-            }
+            //     // 프론트에 알림 표시
+            //     setShowTuneAlert(true)
+            // }
         }
     }
 
